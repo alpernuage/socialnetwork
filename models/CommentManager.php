@@ -26,3 +26,35 @@ function GetAllCommentsFromUserId($userId)
   );
   return $response->fetchAll();
 }
+
+function GetAllCommentsFromPostId($postId)
+{
+  global $PDO;
+  $response = $PDO->query(
+    "SELECT comment.*, user.nickname "
+      . "FROM comment LEFT JOIN user on (comment.user_id = user.id) "
+      . "WHERE comment.post_id = $postId "
+      . "ORDER BY comment.created_at ASC"
+  );
+  $rows = $response->fetchAll();
+  return $rows;
+}
+
+function GetUserIdFromUserAndPassword($login, $password)
+{
+  global $PDO;
+  $preparedRequest = $PDO->prepare("select * from user where pseudo=:nickname and mdp=:password");
+  $preparedRequest->execute(
+    array(
+      "nickname" => $login,
+      "password" => $password
+    )
+  );
+  $users = $preparedRequest->fetchAll();
+  if (count($users) == 1) {
+    $user = $users[0];
+    return $user['id'];
+  } else {
+    return -1;
+  }
+}
